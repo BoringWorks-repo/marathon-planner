@@ -1,5 +1,5 @@
 const AppConfig = {
-  plansPath: "/hacks/calendarhack/plans/json/",
+  plansPath: `${import.meta.env.BASE_URL}plans/json/`,
 };
 
 export const Config = AppConfig;
