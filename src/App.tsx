@@ -28,7 +28,7 @@ import { usePaces } from "./paceStore";
 
 
 const App = () => {
-  const paces = usePaces();
+  usePaces();
 
   const [{ u, p, d, s }, setq] = useQueryParams({
     u: StringParam,
