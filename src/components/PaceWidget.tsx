@@ -1,7 +1,8 @@
 // src/components/PaceWidget.tsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import IMask from "imask";
 import { IMaskInput } from "react-imask";
+import { setPaces } from "../paceStore";
 
 // ---- helpers (same style you had) ----
 function timeToSeconds(t: string): number | null {
@@ -72,6 +73,27 @@ const PaceWidget: React.FC<PaceWidgetProps> = ({ units, isPfitz }) => {
 
     const unitLabel = units === "mi" ? "min/mi" : "min/km";
 
+    useEffect(() => {
+        // derive total seconds directly from the input field
+        const total = timeToSeconds(goalMarathonTime);
+
+        // If the user hasn't entered a real time, clear the store so nothing renders
+        if (!total || total <= 0 || !result) {
+            setPaces(null);
+            return;
+        }
+
+        if (result) {
+            setPaces({
+                unit: units,
+                unitLabel,
+                MP: result.MP,
+                LT: result.LT,
+                GA: result.GA,
+                LR: result.LR,
+            });
+        }
+    }, [result, units, unitLabel]);
 
     return (
         <>

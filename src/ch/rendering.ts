@@ -1,5 +1,6 @@
 import * as moo from "moo";
 import { Week, DayDetails, Units } from "types/app";
+import { getPaces} from "../paceStore";
 
 export function kmToMiles(value: number): number {
   return value * 0.62137;
@@ -53,7 +54,7 @@ export function renderDist(value: number[], from: Units, to: Units): string {
     }
     if (value.length === 2) {
       const [v1, v2] = value.map(convert);
-      return format(v1) +  "-" + format(v2) + " " + to;
+      return format(v1) + "-" + format(v2) + " " + to;
     }
   }
   return "";
@@ -121,8 +122,34 @@ function handle_conversions(input: string, from: Units, to: Units): string {
   return result;
 }
 
+type Override =
+  | [RegExp, string]
+  | [RegExp, (match: string) => string | null];
+
+const DISPLAY_OVERRIDES: Override[] = [
+  // Dynamic: replace "LT pace" with the latest LT value from the pace store
+  [/\bLT pace\b/gi, () => {
+    const p = getPaces();                 
+    if (!p || !p.LT) return null;         // null ⇒ keep original text
+    const unit = p.unitLabel ?? "";       // e.g., "min/mi" or "min/km"
+    return unit ? `LT pace (${p.LT} ${unit})` : `LT pace (${p.LT})`;
+  }],
+
+  // (Optional later) add more overrides for MP/Easy/etc.
+  // [/\b(Marathon Pace|MP pace)\b/gi, () => { ... }],
+];
+
+function applyDisplayOverrides(s: string): string {
+  for (const [re, rep] of DISPLAY_OVERRIDES) {
+    s = typeof rep === "string" ? s.replace(re, rep) : s.replace(re, m => rep(m) ?? m);
+  }
+  return s;
+}
+
+
 export function renderStr(input: string, from: Units, to: Units): string {
-  return handle_conversions(input, from, to);
+  const converted = handle_conversions(input, from, to);
+  return applyDisplayOverrides(converted);
 }
 
 export function render(
@@ -131,7 +158,7 @@ export function render(
   to: Units,
 ): [string, string] {
   // [title, desc]
-  let title = handle_conversions(input.title, from, to);
-  let desc = handle_conversions(input.desc, from, to);
+  let title = applyDisplayOverrides(handle_conversions(input.title, from, to));
+  let desc = applyDisplayOverrides(handle_conversions(input.desc, from, to));
   return [title, desc];
 }

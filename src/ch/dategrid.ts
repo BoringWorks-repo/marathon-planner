@@ -51,6 +51,7 @@ export interface RacePlan {
 // dates with swapDow('Monday'. 'Tuesday').
 
 export class DateGrid<T> {
+  
   private _events: Map<string, T> = new Map();
 
   private _min: Date | undefined = undefined;

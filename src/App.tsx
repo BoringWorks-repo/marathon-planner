@@ -24,10 +24,12 @@ import WeekStartsOnPicker from "./components/WeekStartsOnPicker";
 import { useMountEffect } from "./ch/hooks";
 import { Units, PlanSummary, dayOfWeek } from "types/app";
 import { getLocaleUnits } from "./ch/localize";
-
+import { usePaces } from "./paceStore";
 
 
 const App = () => {
+  const paces = usePaces();
+
   const [{ u, p, d, s }, setq] = useQueryParams({
     u: StringParam,
     p: StringParam,
